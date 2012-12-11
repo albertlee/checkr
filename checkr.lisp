@@ -6,31 +6,65 @@
 (defstruct hole
   stone)
 
-(defparameter *board*
-  '((nil nil nil nil nil nil nil nil nil nil nil nil 0)
-    (nil nil nil nil nil nil nil nil nil nil nil  1 2)
-    (nil nil nil nil nil nil nil nil nil nil  3 4 5)
-    (nil nil nil nil nil nil nil nil nil  6  7 8 9)
-    (nil nil nil nil * * * * * * * * * * * * *)
-    (nil nil nil nil * * * * * * * * * * * *)
-    (nil nil nil nil * * * * * * * * * * *)
-    (nil nil nil nil * * * * * * * * * *)
-    (nil nil nil nil * * * * * * * * *)
-    (nil nil nil * * * * * * * * * *)
-    (nil nil  * * * * * * * * * * *) 
-    (nil  * * * * * * * * * * * *)
-    ( * * * * * * * * * * * * * )
-    (nil nil nil nil g h i j)
-    (nil nil nil nil d e f)
-    (nil nil nil nil b c)
-    (nil nil nil nil a)
-    ))
+(defmacro init-board ()
+  `(list '(nil nil nil nil                                       0)
+         '(nil nil nil nil                                      1 2)
+         '(nil nil nil nil                                     3 4 5)
+         '(nil nil nil nil                                    6 7 8 9)
+         '(                                          * * * * * * * * * * * * *)
+         '(nil                                        * * * * * * * * * * * *)
+         '(nil nil                                     * * * * * * * * * * *)
+         '(nil nil nil                                  * * * * * * * * * *)
+         '(nil nil nil nil                               * * * * * * * * *)
+         '(nil nil nil nil                              * * * * * * * * * *)
+         '(nil nil nil nil                             * * * * * * * * * * *) 
+         '(nil nil nil nil                            * * * * * * * * * * * *)
+         '(nil nil nil nil                           * * * * * * * * * * * * *)
+         '(nil nil nil nil nil nil nil nil nil                G H I J)
+         '(nil nil nil nil nil nil nil nil nil nil             D E F)
+         '(nil nil nil nil nil nil nil nil nil nil nil          B C)
+         '(nil nil nil nil nil nil nil nil nil nil nil nil       A)))
+
+(defvar *board* nil)
+
+(defun reset-board ()
+  (setq *board* (copy-tree (init-board))))
+;; 棋盘中的位置
+(defstruct pos
+  row col)
+
+;; TODO: 判断移动的合法性
+(defun move-out (p)
+  (let ((old-stone (nth (pos-col p) (nth (pos-row p) *board*))))
+    (setf (nth (pos-col p) (nth (pos-row p) *board*)) '*)
+    old-stone))
+(defun move-in (p stone)
+  (setf (nth (pos-col p) (nth (pos-row p) *board*)) stone))
+(defun move (from-p to-p)
+  (move-in to-p (move-out from-p)))
+
+(defun adjs (p)
+  "获得一个位置上的相邻6个位置的坐标"
+  (let ((row (pos-row p))
+        (col (pos-col p)))
+    (list
+     (make-pos :row (- row 1) :col (- col 1))
+     (make-pos :row (- row 1) :col col)
+     (make-pos :row row       :col (- col 1))
+     (make-pos :row row       :col (+ col 1))
+     (make-pos :row (+ row 1) :col col)
+     (make-pos :row (+ row 1) :col (+ col 1)))))
+
+(defun move-stone (p direct)
+  "将p 位置上的棋子向direct方向移动 direct : 0 - 5"
+  (move p (nth direct (adjs p))))
+
 
 (defun print-board ()
   ""
   (loop for i from 0 to 16 do
        (progn
-         (loop for i1 from 0 to  i do
+         (loop for i1 from 0 to (- 16 i) do
               (format t " "))
          (loop for j from 0 to 16 do
               (let ((v (nth j (nth i *board*))))
@@ -39,10 +73,14 @@
                         (format t ". ")
                         (format t "~D " v))
                     (format t "  "))))
-                  (format t "~%"))))
+                  (format t "~%")))
+  (format t "~%"))
 
 (defun main ()
   (format t "Start checkr..~%")
+  (reset-board)
+  (print-board)
+  (move-stone (make-pos :row 3 :col 4) 5)
   (print-board))
 
 
