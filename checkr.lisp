@@ -59,6 +59,16 @@
   "将p 位置上的棋子向direct方向移动 direct : 0 - 5"
   (move p (nth direct (adjs p))))
 
+(defun jump-one-pos (start-p direct)
+  "start-p 跳过direct方向的下一个位置"
+  (let ((row (pos-row start-p))
+        (col (pos-col start-p)))
+    (cond ((= direct 0) (make-pos :row (- row 2) :col (- col 2)))
+          ((= direct 1) (make-pos :row (- row 2) :col col))
+          ((= direct 2) (make-pos :row row       :col (- col 2)))
+          ((= direct 3) (make-pos :row row       :col (+ col 2)))
+          ((= direct 4) (make-pos :row (+ row 2) :col col))
+          ((= direct 5) (make-pos :row (+ row 2) :col (+ col 2))))))
 
 (defun print-board ()
   ""
