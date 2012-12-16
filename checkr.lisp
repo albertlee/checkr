@@ -71,7 +71,7 @@
           ((= direct 5) (make-pos :row (+ row 2) :col (+ col 2))))))
 
 (defun print-board ()
-  ""
+  "print board"
   (loop for i from 0 to 16 do
        (progn
          (loop for i1 from 0 to (- 16 i) do
